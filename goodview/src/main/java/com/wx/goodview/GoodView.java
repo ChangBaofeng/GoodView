@@ -38,32 +38,54 @@ import android.widget.TextView;
  * @author venshine
  */
 public class GoodView extends PopupWindow implements IGoodView {
-
+    /**
+     * 显示的文字
+     */
     private String mText = TEXT;
-
+    /**
+     * 显示的文字效果
+     */
     private int mTextColor = TEXT_COLOR;
-
+    /**
+     * 文字显示的大小
+     */
     private int mTextSize = TEXT_SIZE;
-
+    /**
+     * 初始Y坐标
+     */
     private int mFromY = FROM_Y_DELTA;
-
+    /**
+     * 终点Y坐标
+     */
     private int mToY = TO_Y_DELTA;
-
+    /**
+     * 初始透明度
+     */
     private float mFromAlpha = FROM_ALPHA;
-
+    /**
+     * 结束时的透明度
+     */
     private float mToAlpha = TO_ALPHA;
-
+    /**
+     * 动画时长
+     */
     private int mDuration = DURATION;
-
+    /**
+     * 移动的距离
+     */
     private int mDistance = DISTANCE;
-
+    /**
+     * 动画
+     */
     private AnimationSet mAnimationSet;
-
-    private boolean mChanged = false;
+    /**
+     * 各种参数是否改变的控制变量
+     */
+    private boolean mIsAnimateParamsChanged = false;
 
     private Context mContext = null;
 
-    private TextView mGood = null;
+    private TextView mGoodTv = null;
 
     public GoodView(Context context) {
         super(context);
@@ -71,6 +93,10 @@ public class GoodView extends PopupWindow implements IGoodView {
         initView();
     }
 
+    /**
+     * 设置popwindow的布局
+     * 以及设置宽高
+     */
     private void initView() {
         RelativeLayout layout = new RelativeLayout(mContext);
         RelativeLayout.LayoutParams params =
@@ -79,20 +105,25 @@ public class GoodView extends PopupWindow implements IGoodView {
         params.addRule(RelativeLayout.CENTER_HORIZONTAL);
         params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 
-        mGood = new TextView(mContext);
-        mGood.setIncludeFontPadding(false);
-        mGood.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mTextSize);
-        mGood.setTextColor(mTextColor);
-        mGood.setText(mText);
-        mGood.setLayoutParams(params);
-        layout.addView(mGood);
+        mGoodTv = new TextView(mContext);
+        mGoodTv.setIncludeFontPadding(false);
+        mGoodTv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, mTextSize);
+        mGoodTv.setTextColor(mTextColor);
+        mGoodTv.setText(mText);
+        mGoodTv.setLayoutParams(params);
+        layout.addView(mGoodTv);
         setContentView(layout);
-
-        int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        /**
+         * 计算这个view的宽高
+         */
+        /*******************************************************************/
+        //根据提供的大小值和模式，创建一个测量值(格式)
+        int w = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);//未指定模式,子元素大小任意.
         int h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        mGood.measure(w, h);
-        setWidth(mGood.getMeasuredWidth());
-        setHeight(mDistance + mGood.getMeasuredHeight());
+        mGoodTv.measure(w, h);
+        setWidth(mGoodTv.getMeasuredWidth());
+        setHeight(mDistance + mGoodTv.getMeasuredHeight());
+        /*******************************************************************/
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         setFocusable(false);
         setTouchable(false);
@@ -111,15 +142,15 @@ public class GoodView extends PopupWindow implements IGoodView {
             throw new IllegalArgumentException("text cannot be null.");
         }
         mText = text;
-        mGood.setText(text);
-        mGood.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        int w = (int) mGood.getPaint().measureText(text);
+        mGoodTv.setText(text);
+        mGoodTv.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        int w = (int) mGoodTv.getPaint().measureText(text);
         setWidth(w);
-        setHeight(mDistance + getTextViewHeight(mGood, w));
+        setHeight(mDistance + getTextViewHeight(mGoodTv, w));
     }
 
     private static int getTextViewHeight(TextView textView, int width) {
-        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.AT_MOST);
+        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.AT_MOST);//最多不超过width
         int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
         textView.measure(widthMeasureSpec, heightMeasureSpec);
         return textView.getMeasuredHeight();
@@ -132,7 +163,7 @@ public class GoodView extends PopupWindow implements IGoodView {
      */
     private void setTextColor(int color) {
         mTextColor = color;
-        mGood.setTextColor(color);
+        mGoodTv.setTextColor(color);
     }
 
     /**
@@ -142,7 +173,7 @@ public class GoodView extends PopupWindow implements IGoodView {
      */
     private void setTextSize(int textSize) {
         mTextSize = textSize;
-        mGood.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+        mGoodTv.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
     }
 
     /**
@@ -177,13 +208,18 @@ public class GoodView extends PopupWindow implements IGoodView {
             throw new IllegalArgumentException("drawable cannot be null.");
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mGood.setBackground(drawable);
+            mGoodTv.setBackground(drawable);
         } else {
-            mGood.setBackgroundDrawable(drawable);
+            mGoodTv.setBackgroundDrawable(drawable);
         }
-        mGood.setText("");
-        setWidth(drawable.getIntrinsicWidth());
+        /*******************************************************************/
+        //drawable获取实际宽高的方式
+        mGoodTv.setText("");
+        setWidth(drawable.getIntrinsicWidth());//获取drawable实际宽高
+        //加上mDistance 移动动画不会被遮盖
         setHeight(mDistance + drawable.getIntrinsicHeight());
+        /*******************************************************************/
+
     }
 
     /**
@@ -194,8 +230,8 @@ public class GoodView extends PopupWindow implements IGoodView {
     public void setDistance(int dis) {
         mDistance = dis;
         mToY = dis;
-        mChanged = true;
-        setHeight(mDistance + mGood.getMeasuredHeight());
+        mIsAnimateParamsChanged = true;
+        setHeight(mDistance + mGoodTv.getMeasuredHeight());
     }
 
     /**
@@ -207,7 +243,7 @@ public class GoodView extends PopupWindow implements IGoodView {
     public void setTranslateY(int fromY, int toY) {
         mFromY = fromY;
         mToY = toY;
-        mChanged = true;
+        mIsAnimateParamsChanged = true;
     }
 
     /**
@@ -219,7 +255,7 @@ public class GoodView extends PopupWindow implements IGoodView {
     public void setAlpha(float fromAlpha, float toAlpha) {
         mFromAlpha = fromAlpha;
         mToAlpha = toAlpha;
-        mChanged = true;
+        mIsAnimateParamsChanged = true;
     }
 
     /**
@@ -229,7 +265,7 @@ public class GoodView extends PopupWindow implements IGoodView {
      */
     public void setDuration(int duration) {
         mDuration = duration;
-        mChanged = true;
+        mIsAnimateParamsChanged = true;
     }
 
     /**
@@ -245,7 +281,7 @@ public class GoodView extends PopupWindow implements IGoodView {
         mToAlpha = TO_ALPHA;
         mDuration = DURATION;
         mDistance = DISTANCE;
-        mChanged = false;
+        mIsAnimateParamsChanged = false;
         mAnimationSet = createAnimation();
     }
 
@@ -256,13 +292,23 @@ public class GoodView extends PopupWindow implements IGoodView {
      */
     public void show(View v) {
         if (!isShowing()) {
-            int offsetY = -v.getHeight() - getHeight();
-            showAsDropDown(v, v.getWidth() / 2 - getWidth() / 2, offsetY);
-            if (mAnimationSet == null || mChanged) {
+
+            /**
+             * 核心代码
+             * *****************************************************************/
+            int offsetX = v.getWidth() / 2 - getWidth() / 2;//X方向上的偏移量
+            int offsetY = -v.getHeight() - getHeight();//Y方向上的偏移量
+            showAsDropDown(v,offsetX , offsetY);
+//            showAsDropDown(v, v.getWidth() / 2 - getWidth() / 2, -v.getHeight());
+
+//            showAsDropDown(v, 0,0);
+
+            if (mAnimationSet == null || mIsAnimateParamsChanged) {
                 mAnimationSet = createAnimation();
-                mChanged = false;
+                mIsAnimateParamsChanged = false;
             }
-            mGood.startAnimation(mAnimationSet);
+            /*******************************************************************/
+            mGoodTv.startAnimation(mAnimationSet);
         }
     }
 
@@ -273,7 +319,11 @@ public class GoodView extends PopupWindow implements IGoodView {
      */
     private AnimationSet createAnimation() {
         mAnimationSet = new AnimationSet(true);
+        /**
+         * 核心代码
+         * *****************************************************************/
         TranslateAnimation translateAnim = new TranslateAnimation(0, 0, mFromY, -mToY);
+        /*******************************************************************/
         AlphaAnimation alphaAnim = new AlphaAnimation(mFromAlpha, mToAlpha);
         mAnimationSet.addAnimation(translateAnim);
         mAnimationSet.addAnimation(alphaAnim);
